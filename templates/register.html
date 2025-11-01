@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register | SmartFootballCompanion</title>
+  <style>
+    body {
+      background-color: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    form {
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ffcc;
+    }
+    input {
+      width: 250px;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #111;
+      color: white;
+    }
+    button {
+      background: linear-gradient(90deg, #00ffcc, #0072ff);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { transform: scale(1.05); }
+    a { color: #00ffcc; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h2>Create Your Account</h2>
+  {% if message %}
+  <p style="color: #00ffcc;">{{ message }}</p>
+  {% endif %}
+  
+  <form method="POST" action="/register">
+    <input type="text" name="username" placeholder="Enter username" required><br>
+    <input type="password" name="password" placeholder="Enter password" required><br>
+    <button type="submit">Register</button>
+  </form>
+
+  <p>Already have an account? <a href="/login">Login</a></p>
+</body>
+</html>

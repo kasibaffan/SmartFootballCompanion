@@ -1,0 +1,25 @@
+{
+    "AFFAN": {
+        "age": "44",
+        "position": "Midfielder",
+        "weekly_stats": [
+            {
+                "matches": 5666,
+                "distance": 655.0,
+                "calories": 36666.0,
+                "heart_rate": 56,
+                "travel": 666.0,
+                "health_score": 11698
+            }
+        ]
+    },
+    "kasibaffan77": {
+        "password": "Famedha123$",
+        "profile": {
+            "name": "kasibaffan77",
+            "age": "",
+            "position": ""
+        },
+        "weekly_stats": []
+    }
+}

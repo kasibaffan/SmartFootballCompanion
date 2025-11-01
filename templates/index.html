@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Player Account</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      width: 350px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+    button {
+      width: 95%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+    #createBtn {
+      background-color: #00C9A7;
+    }
+    #createBtn:hover {
+      background-color: #02b390;
+    }
+    #nextBtn {
+      display: none;
+      background-color: #007BFF;
+    }
+    #nextBtn:hover {
+      background-color: #0066d3;
+    }
+    #message {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>⚽ Create Your Account</h2>
+    <input type="text" id="username" placeholder="Enter Username" />
+    <input type="password" id="password" placeholder="Enter Password" />
+    <button id="createBtn" onclick="createAccount()">Create Account</button>
+    <button id="nextBtn" onclick="goNext()">Continue ➜</button>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    async function createAccount() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const message = document.getElementById('message');
+
+      if (!username || !password) {
+        message.textContent = "⚠️ Please enter both username and password.";
+        return;
+      }
+
+      try {
+        const response = await fetch('/create_account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        message.textContent = data.message;
+
+        if (data.status === "success") {
+          document.getElementById('createBtn').style.display = 'none';
+          document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+      } catch (error) {
+        console.error(error);
+        message.textContent = "❌ Failed to connect to the server.";
+      }
+    }
+
+    function goNext() {
+      window.location.href = '/health';
+    }
+  </script>
+</body>
+</html>

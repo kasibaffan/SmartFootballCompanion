@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats Page</title>
+</head>
+<body>
+  <h2>Welcome {{ username }}!</h2>
+  <h3>Save Your Stats</h3>
+
+  <form method="POST">
+    <input type="text" name="title" placeholder="Stat title (e.g., Weight, Task, Goal)" required><br><br>
+    <textarea name="data" placeholder="Enter details" required></textarea><br><br>
+    <button type="submit">Save</button>
+  </form>
+
+  <h3>Your Saved Stats</h3>
+  {% if saved_stats %}
+    <ul>
+      {% for s in saved_stats %}
+        <li><strong>{{ s[0] }}</strong>: {{ s[1] }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No stats saved yet.</p>
+  {% endif %}
+
+  <br>
+  <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

@@ -1,0 +1,316 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | SmartFootballCompanion</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #001010, #000);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 2.3em;
+      background: linear-gradient(90deg, #00ffcc, #0072ff, #00ffcc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glowFlow 4s infinite linear;
+      text-shadow: 0 0 25px #00ffff;
+    }
+
+    @keyframes glowFlow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    .container {
+      width: 85%;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      box-shadow: 0 0 30px #00ffcc33;
+      padding: 40px;
+      text-align: center;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, #001818, #000f0f);
+      box-shadow: 0 0 25px #00ffcc55;
+      border-radius: 18px;
+      width: 200px;
+      padding: 25px;
+      transition: 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .stat-card:nth-child(n) {
+      animation: slideIn 0.8s forwards;
+    }
+
+    @keyframes slideIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 40px #00ffffaa;
+    }
+
+    .stat-card h4 {
+      color: #00ffff;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+    }
+
+    .stat-card p {
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+
+    .risk-card {
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 25px #00ffff55;
+      transition: 0.4s;
+    }
+
+    .risk-low { border-color: #00ff99; color: #00ff99; }
+    .risk-medium { border-color: #ffff00; color: #ffff00; }
+    .risk-high { border-color: #ff3333; color: #ff3333; }
+
+    canvas {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ffcc33;
+      margin-top: 40px;
+      padding: 10px;
+    }
+
+    .ai-section {
+      margin-top: 50px;
+      padding: 25px;
+      background: rgba(0, 255, 204, 0.1);
+      border-radius: 15px;
+      box-shadow: 0 0 30px #00ffcc77;
+    }
+
+    .ai-section h3 {
+      color: #00ffcc;
+      margin-bottom: 15px;
+    }
+
+    .ai-section p {
+      font-size: 1.05em;
+      color: #b8fff2;
+    }
+
+    .ai-section li {
+      list-style: none;
+      margin: 8px 0;
+      color: #00ffcc;
+      font-size: 1.1em;
+    }
+
+    .links {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    a {
+      color: #00ffff;
+      text-decoration: none;
+      margin: 10px;
+      transition: 0.3s;
+    }
+
+    a:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    footer {
+      text-align: center;
+      color: #00ffccaa;
+      padding: 20px;
+      margin-top: 50px;
+      font-size: 0.9em;
+    }
+
+    /* Performance gauge */
+    .gauge {
+      margin: 30px auto;
+      width: 180px;
+      height: 90px;
+      background: conic-gradient(#00ffcc calc(var(--value) * 1%), #222 calc(var(--value) * 1%));
+      border-radius: 150px 150px 0 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px #00ffcc55;
+    }
+
+    .gauge::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2em;
+      color: #00ffcc;
+    }
+
+  </style>
+</head>
+<body>
+  <header>⚽ SmartFootballCompanion Dashboard</header>
+
+  <div class="container">
+    <h3>Welcome, {{ username }}!</h3>
+
+    {% if latest %}
+    <div class="stats">
+      <div class="stat-card"><h4>Matches</h4><p>{{ latest.matches }}</p></div>
+      <div class="stat-card"><h4>Distance (km)</h4><p>{{ latest.distance }}</p></div>
+      <div class="stat-card"><h4>Calories</h4><p>{{ latest.calories }}</p></div>
+      <div class="stat-card"><h4>Heart Rate</h4><p>{{ latest.heart_rate }}</p></div>
+      <div class="stat-card"><h4>Travel (km)</h4><p>{{ latest.travel }}</p></div>
+
+      <!-- Injury Risk Card -->
+      <div class="stat-card risk-card 
+        {% if latest.injury_risk < 40 %}risk-low{% elif latest.injury_risk < 70 %}risk-medium{% else %}risk-high{% endif %}">
+        <h4>Injury Risk</h4>
+        <p>{{ latest.injury_risk }}%<br><small>{{ latest.risk_level }}</small></p>
+      </div>
+    </div>
+
+    <h3 style="color:#00ffcc;">Performance Overview</h3>
+    <p>🏋️ Health Score: <b>{{ health_score }}</b> | 🚗 Mobility Score: <b>{{ mobility_score }}</b></p>
+    <p>📈 Level: <b>{{ performance_level }}</b></p>
+
+    <!-- Performance Gauge -->
+    <div class="gauge" style="--value:{{ performance_score }}" data-label="Performance {{ performance_score }}%"></div>
+
+    <canvas id="performanceChart"></canvas>
+    <canvas id="injuryChart"></canvas>
+    {% else %}
+      <p>No stats yet! Go to <a href="/health">Health Tracker</a> to add your first entry.</p>
+    {% endif %}
+  </div>
+
+  {% if ai_reviews %}
+  <div class="ai-section">
+    <h3>🤖 AI Health Insights</h3>
+    <ul id="aiList">
+      {% for review in ai_reviews %}
+        <li class="review-item">{{ review }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Performance Prediction & Training Advice -->
+  <div class="ai-section" style="margin-top:40px;">
+    <h3>🏆 Performance Prediction</h3>
+    <p>{{ suggestion_text }}</p>
+
+    <h3 style="margin-top:20px;">💪 Training Suggestion</h3>
+    <p>{{ training_advice }}</p>
+  </div>
+
+  <div class="links">
+    <a href="/health">➕ Add More Stats</a> |
+    <a href="/eco">🌱 Eco Travel Optimizer</a> |
+    <a href="/logout">🚪 Logout</a>
+  </div>
+
+  {% if stats %}
+  <script>
+    const stats = {{ stats | tojson }};
+    const labels = stats.map((_, i) => `Week ${i + 1}`);
+    const matches = stats.map(s => s.matches);
+    const distance = stats.map(s => s.distance);
+    const calories = stats.map(s => s.calories);
+    const injuryRisk = stats.map(s => s.injury_risk);
+
+    // Performance Graph
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Matches Played', data: matches, borderColor: '#00ffcc', fill: false, tension: 0.3 },
+          { label: 'Distance (km)', data: distance, borderColor: '#0072ff', fill: false, tension: 0.3 },
+          { label: 'Calories Burned', data: calories, borderColor: '#ffff00', fill: false, tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#00ffcc' } } },
+        scales: { x: { ticks: { color: '#00ffcc' } }, y: { ticks: { color: '#00ffcc' } } }
+      }
+    });
+
+    // Injury Risk Chart
+    const ctx2 = document.getElementById('injuryChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Injury Risk (%)',
+          data: injuryRisk,
+          backgroundColor: injuryRisk.map(r => r < 40 ? '#00ff99' : r < 70 ? '#ffff00' : '#ff3333'),
+          borderRadius: 8
+        }]
+      },
+      options: {
+        plugins: { legend: { labels: { color: '#00ffcc' } } },
+        scales: {
+          x: { ticks: { color: '#00ffcc' } },
+          y: { ticks: { color: '#00ffcc' }, min: 0, max: 100 }
+        }
+      }
+    });
+
+    // Typewriter effect for AI reviews
+    const reviews = document.querySelectorAll('.review-item');
+    reviews.forEach((el, i) => {
+      const text = el.textContent;
+      el.textContent = '';
+      let idx = 0;
+      setTimeout(() => {
+        const typer = setInterval(() => {
+          if (idx < text.length) {
+            el.textContent += text.charAt(idx);
+            idx++;
+          } else clearInterval(typer);
+        }, 30);
+      }, i * 800);
+    });
+  </script>
+  {% endif %}
+
+  <footer>© 2025 SmartFootballCompanion | Health • Sustainability • AI Analytics ⚽🌱</footer>
+</body>
+</html>

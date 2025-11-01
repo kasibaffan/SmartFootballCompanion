@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #00ffff;
+    font-family: 'Poppins', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: black;
+}
+
+.bottom-container {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 30px 50px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+    animation: slideUp 1.2s ease;
+}
+
+.title {
+    font-size: 1.8em;
+    color: #00eaff;
+    margin-bottom: 15px;
+    text-shadow: 0 0 20px #00eaff;
+    animation: glowPulse 2s infinite;
+}
+
+.form input {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #00ffff;
+    background: rgba(0, 0, 0, 0.6);
+    color: #00ffff;
+    font-size: 1em;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form input:focus {
+    box-shadow: 0 0 10px #00ffff;
+}
+
+button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00eaff, #0077ff);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #00eaff;
+}
+
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px #00ffff;
+    animation: fadeIn 1s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+    0% { text-shadow: 0 0 10px #00ffff; }
+    50% { text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff; }
+    100% { text-shadow: 0 0 10px #00ffff; }
+}

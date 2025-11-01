@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Player Health & Performance Tracker</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #001a1a, #000);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h2 {
+      text-shadow: 0 0 20px #00ffff;
+      font-size: 2em;
+      animation: glow 3s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00ffcc; }
+      to { text-shadow: 0 0 30px #00ffff, 0 0 50px #0072ff; }
+    }
+    form {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px #00ffcc55;
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      animation: fadeIn 1.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    label {
+      margin-top: 10px;
+      color: #00ffcc;
+    }
+    input {
+      margin-top: 5px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 1em;
+    }
+    button {
+      background: linear-gradient(90deg, #00ffcc, #0072ff);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px #00ffffaa;
+    }
+    a {
+      margin-top: 15px;
+      color: #00ffff;
+      text-decoration: none;
+    }
+    a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+  <h2>⚽ Player Weekly Performance</h2>
+  <form method="POST" action="/health">
+    <label>Matches Played:</label>
+    <input type="number" name="matches" required>
+
+    <label>Distance Covered (km):</label>
+    <input type="number" step="0.1" name="distance" required>
+
+    <label>Calories Burned:</label>
+    <input type="number" name="calories" required>
+
+    <label>Average Heart Rate (bpm):</label>
+    <input type="number" name="heart_rate" required>
+
+    <label>Travel Distance (km):</label>
+    <input type="number" step="0.1" name="travel" required>
+
+    <hr style="margin: 20px 0; border: 0.5px solid #00ffcc33;">
+
+    <label>Minutes Played:</label>
+    <input type="number" name="minutes" required>
+
+    <label>Challenges Faced:</label>
+    <input type="number" name="challenges" required>
+
+    <label>Goals Scored:</label>
+    <input type="number" name="goals" required>
+
+    <label>Assists:</label>
+    <input type="number" name="assists" required>
+
+    <button type="submit">💾 Save Weekly Stats</button>
+  </form>
+  <a href="/dashboard">⬅ Back to Dashboard</a>
+</body>
+</html>

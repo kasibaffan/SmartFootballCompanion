@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile - Smart Football Companion</title>
+  <style>
+    body { background:#000; color:#0ff; font-family:Poppins, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;}
+    .card { background: rgba(255,255,255,0.03); padding:24px; border-radius:12px; width:360px; box-shadow:0 0 25px rgba(0,255,170,0.05); }
+    input, button { display:block; width:100%; margin:10px 0; padding:10px; border-radius:8px; border:none; }
+    button { background:#00ffcc; color:#000; font-weight:700; cursor:pointer; }
+    a { color:#00ffcc; display:inline-block; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Profile ({{ user.profile.name }})</h2>
+    <form method="post">
+      <input name="name" placeholder="Full name" value="{{ user.profile.name }}">
+      <input name="age" placeholder="Age" value="{{ user.profile.age }}">
+      <input name="position" placeholder="Position" value="{{ user.profile.position }}">
+      <button type="submit">Save Profile</button>
+    </form>
+    <a href="/health">Enter Weekly Health</a> | <a href="/dashboard">Dashboard</a> | <a href="/logout">Logout</a>
+  </div>
+</body>
+</html>
