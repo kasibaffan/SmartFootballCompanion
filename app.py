@@ -1,280 +1,167 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-import json, os
+# app.py
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import sqlite3
+import random
+from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.secret_key = 'smartfootballsecret'
+app.secret_key = 'nexus_athlete_2025'
 
+DB = 'nexus.db'
 
-# ---------- HOME ----------
+def init_db():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT,
+        name TEXT, age INTEGER, position TEXT, level INTEGER DEFAULT 1, xp INTEGER DEFAULT 0, streak INTEGER DEFAULT 0
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS stats (
+        id INTEGER PRIMARY KEY, user_id INTEGER,
+        matches INTEGER, distance REAL, calories INTEGER, heart_rate INTEGER,
+        travel REAL, minutes INTEGER, challenges INTEGER, goals INTEGER, assists INTEGER,
+        timestamp TEXT
+    )''')
+    conn.commit(); conn.close()
+
+init_db()
+
+# === AI LOGIC ===
+def analyze_performance(stats_list):
+    if not stats_list: return {}, [], "Beginner", "Start tracking!", "Log your first session."
+
+    latest = stats_list[-1]
+    avg_hr = sum(s[3] for s in stats_list) / len(stats_list)
+    total_goals = sum(s[7] for s in stats_list)
+
+    score = min(100, int(
+        (latest[0] * 5) + (latest[1] * 2) + (latest[2] / 100) + (latest[7] * 10) + (latest[8] * 8)
+    ))
+
+    reviews = []
+    if latest[3] > 180: reviews.append("High heart rate! Focus on recovery.")
+    if latest[1] < 5: reviews.append("Increase distance covered per match.")
+    if latest[7] == 0: reviews.append("Time to score! Work on finishing.")
+
+    level = "Rookie" if score < 40 else "Pro" if score < 70 else "Elite" if score < 90 else "Legend"
+    advice = random.choice([
+        "Add interval sprints to boost stamina.",
+        "Focus on core strength for better balance.",
+        "Hydrate more — performance starts with recovery."
+    ])
+    suggestion = f"Score {max(1, 3 - total_goals)} goals this week!"
+
+    return {"score": score}, reviews, level, suggestion, advice
+
+# === ROUTES ===
 @app.route('/')
 def home():
     return render_template('home.html')
 
-
-# ---------- REGISTER ----------
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if os.path.exists('users.json'):
-            with open('users.json', 'r') as f:
-                users = json.load(f)
-        else:
-            users = {}
-
-        if username in users:
-            return "User already exists! Try logging in."
-
-        users[username] = {'password': password, 'stats': []}
-
-        with open('users.json', 'w') as f:
-            json.dump(users, f, indent=4)
-
-        return redirect(url_for('login'))
-    return render_template('register.html')
-
-
-# ---------- LOGIN ----------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if not os.path.exists('users.json'):
-            return "No users found. Register first."
-
-        with open('users.json', 'r') as f:
-            users = json.load(f)
-
-        if username in users and users[username]['password'] == password:
-            session['user'] = username
-            return redirect(url_for('dashboard'))
-        else:
-            return "Invalid username or password."
-
+        user = sqlite3.connect(DB).execute(
+            "SELECT * FROM users WHERE username=?", (request.form['username'],)
+        ).fetchone()
+        if user and user[2] == request.form['password']:
+            session['user_id'] = user[0]
+            session['username'] = user[1]
+            return redirect('/dashboard')
     return render_template('login.html')
 
-
-# ---------- LOGOUT ----------
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('login'))
-
-
-# ---------- HEALTH + INJURY TRACKER ----------
-@app.route('/health', methods=['GET', 'POST'])
-def health():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-
+@app.route('/register', methods=['GET', 'POST'])
+def register():
     if request.method == 'POST':
+        conn = sqlite3.connect(DB)
         try:
-            matches = int(request.form['matches'])
-            distance = float(request.form['distance'])
-            calories = int(request.form['calories'])
-            heart_rate = int(request.form['heart_rate'])
-            travel = float(request.form['travel'])
-            minutes = int(request.form['minutes'])
-            challenges = int(request.form['challenges'])
-            goals = int(request.form['goals'])
-            assists = int(request.form['assists'])
+            conn.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+                        (request.form['username'], request.form['password']))
+            conn.commit()
+            return redirect('/login')
+        except: pass
+        finally: conn.close()
+    return render_template('register.html')
 
-            # Health and Mobility scores
-            health_score = min(100, (calories / 50) + (matches * 5) + (heart_rate / 2))
-            mobility_score = min(100, (distance * 3) - (travel / 2))
-
-            # Injury Risk Calculation
-            injury_risk = (minutes * 0.05) + (challenges * 0.1) - ((goals + assists) * 0.03)
-            injury_risk = max(0, min(100, round(injury_risk, 2)))
-
-            if injury_risk < 40:
-                risk_level = "🟢 Low"
-            elif injury_risk < 70:
-                risk_level = "🟡 Moderate"
-            else:
-                risk_level = "🔴 High"
-
-            # Load users data
-            if os.path.exists('users.json'):
-                with open('users.json', 'r') as f:
-                    users = json.load(f)
-            else:
-                users = {}
-
-            username = session['user']
-            if username not in users:
-                users[username] = {}
-
-            if 'stats' not in users[username]:
-                users[username]['stats'] = []
-
-            users[username]['stats'].append({
-                "matches": matches,
-                "distance": distance,
-                "calories": calories,
-                "heart_rate": heart_rate,
-                "travel": travel,
-                "minutes": minutes,
-                "challenges": challenges,
-                "goals": goals,
-                "assists": assists,
-                "injury_risk": injury_risk,
-                "risk_level": risk_level,
-                "health_score": round(health_score, 2),
-                "mobility_score": round(mobility_score, 2)
-            })
-
-            with open('users.json', 'w') as f:
-                json.dump(users, f, indent=4)
-
-            return redirect(url_for('dashboard'))
-
-        except Exception as e:
-            print("Error:", e)
-            return "Error saving stats"
-
-    return render_template('health.html')
-
-
-# ---------- DASHBOARD ----------
 @app.route('/dashboard')
 def dashboard():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-
-    username = session['user']
-
-    if not os.path.exists('users.json'):
-        return "No data found."
-
-    with open('users.json', 'r') as f:
-        users = json.load(f)
-
-    user_data = users.get(username, {})
-    stats = user_data.get('stats', [])
-
+    if 'user_id' not in session: return redirect('/login')
+    
+    conn = sqlite3.connect(DB)
+    stats = conn.execute("SELECT * FROM stats WHERE user_id=? ORDER BY timestamp", 
+                        (session['user_id'],)).fetchall()
+    user = conn.execute("SELECT * FROM users WHERE id=?", (session['user_id'],)).fetchone()
+    
     latest = stats[-1] if stats else None
-    health_score = latest.get('health_score', 0) if latest else 0
-    mobility_score = latest.get('mobility_score', 0) if latest else 0
-
-    if latest:
-        avg_performance = (health_score + mobility_score) / 2
-        if avg_performance > 80:
-            performance_level = "🔥 Excellent"
-        elif avg_performance > 50:
-            performance_level = "⚡ Good"
-        else:
-            performance_level = "💤 Needs Improvement"
-    else:
-        performance_level = "No data yet"
-
-    ai_reviews = []
-    suggestion_text = ""
-    training_advice = ""
-
-    if latest:
-        injury_risk = latest["injury_risk"]
-        goals = latest["goals"]
-        assists = latest["assists"]
-        matches = latest["matches"]
-        heart_rate = latest["heart_rate"]
-        calories = latest["calories"]
-        travel = latest["travel"]
-
-        # ----- PERFORMANCE PREDICTION -----
-        performance_score = 50 + (matches * 2) + (goals * 3) + (assists * 2)
-        performance_score += (calories / 100)
-        performance_score -= (heart_rate - 90) * 0.2
-        performance_score -= (travel / 10)
-        performance_score = max(0, min(100, round(performance_score, 1)))
-
-        if performance_score > 80:
-            suggestion_text = f"🔥 Excellent form! You can perform at {performance_score}% efficiency and potentially score 2–3 goals."
-        elif performance_score > 60:
-            suggestion_text = f"⚽ Good form! Expect around {performance_score}% match fitness and decent passing accuracy."
-        elif performance_score > 40:
-            suggestion_text = f"⚠️ Moderate condition ({performance_score}%). Take light training to improve stamina."
-        else:
-            suggestion_text = f"🩹 Low energy ({performance_score}%). Recovery and rest recommended."
-
-        # ----- TRAINING ADVICE ENGINE -----
-        if injury_risk < 40:
-            training_advice = "✅ Low injury risk — continue your regular training and focus on endurance drills."
-        elif injury_risk < 70:
-            training_advice = "🟡 Moderate risk — reduce physical load and emphasize stretching & recovery exercises."
-        else:
-            training_advice = "🔴 High risk — avoid high-impact drills; prioritize physiotherapy and rest."
-
-        # ----- AI REVIEW LOGIC -----
-        if injury_risk > 70:
-            ai_reviews.append("⚠️ High injury risk detected — consider rest or lighter sessions.")
-        elif injury_risk > 40:
-            ai_reviews.append("🟡 Moderate injury risk — focus on recovery and hydration.")
-        else:
-            ai_reviews.append("✅ Low injury risk — maintain your current performance routine!")
-
-        if goals >= 2:
-            ai_reviews.append("⚽ Great goal-scoring performance!")
-        if assists >= 2:
-            ai_reviews.append("🎯 Excellent playmaking contribution!")
-
-    else:
-        performance_score = 0
-        suggestion_text = ""
-        training_advice = ""
-
-    return render_template(
-        'dashboard.html',
-        username=username,
-        latest=latest,
+    perf = analyze_performance(stats) if stats else ({}, [], "Beginner", "", "")
+    
+    return render_template('dashboard.html',
+        username=session['username'],
         stats=stats,
-        health_score=health_score,
-        mobility_score=mobility_score,
-        performance_level=performance_level,
-        ai_reviews=ai_reviews,
-        performance_score=performance_score,
-        suggestion_text=suggestion_text,
-        training_advice=training_advice
+        latest=latest._asdict() if latest else None,
+        performance_score=perf[0].get('score', 0),
+        ai_reviews=perf[1],
+        performance_level=perf[2],
+        suggestion_text=perf[3],
+        training_advice=perf[4],
+        user_level=user[6], user_xp=user[7], streak=user[8]
     )
 
-    
+@app.route('/health', methods=['GET', 'POST'])
+def health():
+    if 'user_id' not in session: return redirect('/login')
+    if request.method == 'POST':
+        conn = sqlite3.connect(DB)
+        conn.execute("""INSERT INTO stats (user_id, matches, distance, calories, heart_rate, travel,
+                        minutes, challenges, goals, assists, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (session['user_id'], *(request.form.get(k) for k in [
+                'matches','distance','calories','heart_rate','travel',
+                'minutes','challenges','goals','assists'
+            ]), datetime.now().isoformat()))
+        conn.commit(); conn.close()
+        return redirect('/dashboard')
+    return render_template('health.html')
 
-
-# ---------- ECO TRAVEL ----------
 @app.route('/eco', methods=['GET', 'POST'])
 def eco():
-    carbon_saved = None
-    travel_mode = None
-    suggestion = None
-
+    if 'user_id' not in session: return redirect('/login')
+    result = None
     if request.method == 'POST':
-        try:
-            distance = float(request.form.get('distance', 0))
+        mode = request.form['mode']
+        dist = float(request.form['distance'])
+        co2 = {'car': 0.4, 'bus': 0.1, 'bike': 0, 'walk': 0}[mode] * dist
+        time = dist / {'car': 50, 'bus': 30, 'bike': 15, 'walk': 5}[mode]
+        result = {
+            'city': request.form['city'],
+            'temp': random.randint(15, 32),
+            'condition': random.choice(['Sunny', 'Cloudy', 'Rainy']),
+            'time': round(time, 1),
+            'co2': round(co2, 2),
+            'fuel_cost': round(dist * 0.12 * 80, 0) if mode == 'car' else 0,
+            'eco_tip': "Go green: Bike or walk when possible!" if mode in ['car','bus'] else "Great choice! Zero emissions!",
+            'weather_tip': "Wear light clothes!" if result['temp'] > 28 else "Carry a jacket.",
+            'mode': mode
+        }
+    return render_template('eco.html', result=result)
 
-            car_emission = distance * 0.21
-            eco_emission = distance * 0.05
-            carbon_saved = round(car_emission - eco_emission, 2)
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session: return redirect('/login')
+    conn = sqlite3.connect(DB)
+    user = conn.execute("SELECT * FROM users WHERE id=?", (session['user_id'],)).fetchone()
+    if request.method == 'POST':
+        conn.execute("UPDATE users SET name=?, age=?, position=? WHERE id=?",
+                    (request.form['name'], request.form['age'], request.form['position'], session['user_id']))
+        conn.commit()
+    conn.close()
+    return render_template('profile.html', user={ 'profile': { 'name': user[3], 'age': user[4], 'position': user[5] }})
 
-            if distance <= 3:
-                travel_mode = "🚶 Walking"
-            elif distance <= 8:
-                travel_mode = "🚴 Cycling"
-            elif distance <= 25:
-                travel_mode = "🚌 Public Transport"
-            else:
-                travel_mode = "🚗 Carpooling / EV"
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
 
-            suggestion = f"By switching to {travel_mode}, you saved approximately {carbon_saved} kg of CO₂ this week!"
-        except:
-            suggestion = "Please enter a valid distance!"
-
-    return render_template('eco.html', suggestion=suggestion, carbon_saved=carbon_saved, travel_mode=travel_mode)
-
-
-# ---------- RUN ----------
 if __name__ == '__main__':
     app.run(debug=True)

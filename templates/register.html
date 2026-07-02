@@ -3,56 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <title>Register | SmartFootballCompanion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    body {
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
+    .register-box {
+      background: rgba(0, 255, 204, 0.05);
+      border-radius: 15px;
+      box-shadow: 0 0 25px #00ffcc55;
+      width: 400px;
+      margin: 100px auto;
+      padding: 35px;
+      text-align: center;
+      animation: fadeInDown 1.2s ease-out;
+      position: relative;
+      overflow: hidden;
     }
-    form {
-      background: rgba(255,255,255,0.1);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #00ffcc;
+
+    .glow-circle {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0072ff33, transparent);
+      bottom: -130px;
+      right: -100px;
+      filter: blur(25px);
+      animation: rotateGlow 6s infinite linear;
     }
-    input {
-      width: 250px;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 6px;
+
+    @keyframes fadeInDown {
+      from { transform: translateY(-40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .register-box h2 {
+      background: linear-gradient(90deg, #00ffcc, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2em;
+      margin-bottom: 25px;
+      text-shadow: 0 0 15px #00ffcc66;
+    }
+
+    .input-field {
+      width: 80%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.7);
       border: none;
-      background: #111;
-      color: white;
+      color: #00ffcc;
+      font-size: 1em;
+      transition: all 0.3s;
     }
-    button {
+
+    .input-field:focus {
+      box-shadow: 0 0 15px #00ffff;
+      transform: scale(1.03);
+    }
+
+    .btn {
       background: linear-gradient(90deg, #00ffcc, #0072ff);
       border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
+      padding: 12px 25px;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 600;
       cursor: pointer;
+      margin-top: 20px;
+      transition: 0.3s ease;
     }
-    button:hover { transform: scale(1.05); }
-    a { color: #00ffcc; text-decoration: none; }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #00ffaa, #00ffff);
+      transform: scale(1.08);
+      box-shadow: 0 0 20px #00ffff88;
+    }
+
+    .link {
+      margin-top: 15px;
+      display: block;
+      color: #00ffcc;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #00ffff;
+    }
   </style>
 </head>
 <body>
-  <h2>Create Your Account</h2>
-  {% if message %}
-  <p style="color: #00ffcc;">{{ message }}</p>
-  {% endif %}
-  
-  <form method="POST" action="/register">
-    <input type="text" name="username" placeholder="Enter username" required><br>
-    <input type="password" name="password" placeholder="Enter password" required><br>
-    <button type="submit">Register</button>
-  </form>
+  <div class="register-box">
+    <div class="glow-circle"></div>
+    <h2>Create Player Account 🏃‍♂️</h2>
+    <form method="POST">
+      <input class="input-field" type="text" name="username" placeholder="Enter Username" required><br>
+      <input class="input-field" type="password" name="password" placeholder="Enter Password" required><br>
+      <button class="btn" type="submit">Create Account</button>
+    </form>
+    <a href="/login" class="link">Already have an account? Login</a>
+  </div>
 
-  <p>Already have an account? <a href="/login">Login</a></p>
+  <footer>© 2025 SmartFootballCompanion | Join the Team 🌟</footer>
 </body>
 </html>

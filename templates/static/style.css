@@ -1,103 +1,109 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
 body {
-    margin: 0;
-    padding: 0;
-    background: #000;
-    color: #00ffff;
-    font-family: 'Poppins', sans-serif;
-    overflow: hidden;
-    height: 100vh;
-}
-
-#bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    background: black;
-}
-
-.bottom-container {
-    position: absolute;
-    bottom: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 2;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 30px 50px;
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
-    animation: slideUp 1.2s ease;
-}
-
-.title {
-    font-size: 1.8em;
-    color: #00eaff;
-    margin-bottom: 15px;
-    text-shadow: 0 0 20px #00eaff;
-    animation: glowPulse 2s infinite;
-}
-
-.form input {
-    display: block;
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #00ffff;
-    background: rgba(0, 0, 0, 0.6);
-    color: #00ffff;
-    font-size: 1em;
-    outline: none;
-    transition: 0.3s;
-}
-
-.form input:focus {
-    box-shadow: 0 0 10px #00ffff;
-}
-
-button {
-    margin-top: 15px;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #00eaff, #0077ff);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px #00eaff;
-}
-
-.result {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    background: rgba(0, 255, 255, 0.1);
-    box-shadow: 0 0 15px #00ffff;
-    animation: fadeIn 1s ease;
-}
-
-@keyframes slideUp {
-    from { transform: translate(-50%, 100%); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
+  background: radial-gradient(circle at top, #001010, #000);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  animation: fadeIn 1s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes glowPulse {
-    0% { text-shadow: 0 0 10px #00ffff; }
-    50% { text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff; }
-    100% { text-shadow: 0 0 10px #00ffff; }
+.container {
+  width: 80%;
+  margin: 50px auto;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  box-shadow: 0 0 25px #00ffcc44;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  animation: slideUp 0.8s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(25px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+h1, h2, h3 {
+  background: linear-gradient(90deg, #00ffcc, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px #00ffcc55;
+}
+
+input, select {
+  padding: 12px;
+  width: 70%;
+  border-radius: 10px;
+  border: none;
+  margin: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #00ffcc;
+  font-size: 1em;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus, select:focus {
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+button {
+  background: #00ffcc;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00ffaa;
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00ffff88;
+}
+
+a {
+  color: #00ffff;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+footer {
+  text-align: center;
+  color: #00ffccaa;
+  margin-top: 50px;
+  padding: 20px;
+  font-size: 0.9em;
+}
+
+.card {
+  background: rgba(0, 255, 204, 0.05);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 0 20px #00ffcc33;
+  margin: 20px auto;
+  width: 70%;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 30px #00ffcc66;
 }

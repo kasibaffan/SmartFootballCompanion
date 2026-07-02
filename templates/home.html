@@ -1,20 +1,142 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Smart Football Companion</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NEXUS ATHLETE™</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@300;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
   <style>
-    body { background:#000; color:#0ff; font-family: Poppins, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-    .card { background: rgba(255,255,255,0.03); padding:30px; border-radius:12px; text-align:center; box-shadow:0 0 30px rgba(0,255,200,0.08);}
-    a { color:#00ffcc; text-decoration:none; margin:10px; display:inline-block; }
+    :root {
+      --bg: #050814;
+      --primary: #00ffcc;
+      --secondary: #0072ff;
+      --accent: #ff00aa;
+      --text: #e0f7fa;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      position: relative;
+    }
+    .matrix-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to bottom, #000 0%, #001a1a 100%);
+      overflow: hidden;
+    }
+    .matrix-rain {
+      position: absolute;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .drop {
+      position: absolute;
+      color: var(--primary);
+      font-family: 'Courier New';
+      font-size: 14px;
+      opacity: 0;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh); opacity: 0; }
+    }
+    .hero {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo-3d {
+      width: 200px; height: 200px;
+      background: url('https://i.imgur.com/5z5z5z5.png') center/contain no-repeat;
+      filter: drop-shadow(0 0 40px var(--primary));
+      animation: float 6s infinite ease-in-out;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 5rem;
+      font-weight: 900;
+      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 60px rgba(0,255,204,0.8);
+      letter-spacing: 8px;
+      margin: 20px 0;
+    }
+    .tagline {
+      font-size: 1.5rem;
+      color: #88f7d8;
+      margin: 20px 0 50px;
+      letter-spacing: 3px;
+      opacity: 0;
+    }
+    .cta {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      padding: 18px 50px;
+      border: none;
+      border-radius: 50px;
+      color: #000;
+      font-weight: 800;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 0 60px rgba(0,255,204,0.7);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s;
+    }
+    .cta:hover {
+      transform: scale(1.1) translateY(-10px);
+      box-shadow: 0 0 100px rgba(0,255,204,1);
+    }
+    .cta::before {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: scan 2s infinite;
+    }
+    @keyframes scan { to { left: 100%; } }
+    @keyframes float { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(5deg); } }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Smart Football Companion</h1>
-    <p>Register or login to save your profile & weekly stats.</p>
-    <a href="/register">Register</a> | <a href="/login">Login</a>
+  <div class="matrix-bg">
+    <div class="matrix-rain" id="rain"></div>
   </div>
+
+  <div class="hero">
+    <div class="logo-3d"></div>
+    <h1>NEXUS ATHLETE</h1>
+    <p class="tagline">AI COACH • 3D PERFORMANCE • ECO WARRIOR</p>
+    <button class="cta" onclick="location.href='/login'">ENTER THE MATRIX</button>
+  </div>
+
+  <script>
+    // Matrix Rain
+    const rain = document.getElementById('rain');
+    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    setInterval(() => {
+      const drop = document.createElement('div');
+      drop.className = 'drop';
+      drop.textContent = chars[Math.floor(Math.random() * chars.length)];
+      drop.style.left = Math.random() * 100 + 'vw';
+      drop.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      drop.style.opacity = Math.random();
+      rain.appendChild(drop);
+      setTimeout(() => drop.remove(), 5000);
+    }, 50);
+
+    // GSAP Animations
+    gsap.from("h1", { y: 100, opacity: 0, duration: 1.5, delay: 0.5 });
+    gsap.to(".tagline", { opacity: 1, y: 0, duration: 1, delay: 1 });
+  </script>
 </body>
 </html>

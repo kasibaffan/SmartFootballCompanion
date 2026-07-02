@@ -1,27 +1,56 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profile - Smart Football Companion</title>
+  <title>PLAYER CARD | NEXUS</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
   <style>
-    body { background:#000; color:#0ff; font-family:Poppins, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;}
-    .card { background: rgba(255,255,255,0.03); padding:24px; border-radius:12px; width:360px; box-shadow:0 0 25px rgba(0,255,170,0.05); }
-    input, button { display:block; width:100%; margin:10px 0; padding:10px; border-radius:8px; border:none; }
-    button { background:#00ffcc; color:#000; font-weight:700; cursor:pointer; }
-    a { color:#00ffcc; display:inline-block; margin-top:8px; }
+    body { margin:0; background:#050814; color:#e0f7fa; font-family:'Exo 2'; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .card-3d { width:420px; height:600px; position:relative; perspective:1000px; }
+    #cardCanvas { width:100%; height:100%; }
+    .info { position:absolute; bottom:20px; left:20px; right:20px; background:rgba(0,0,0,0.7); padding:20px; border-radius:20px; backdrop-filter:blur(10px); border:1px solid #00ffcc33; }
+    .info h2 { color:#00ffcc; font-family:Orbitron; margin-bottom:10px; }
+    input { width:100%; padding:12px; margin:8px 0; background:#112; border:1px solid #00ffcc33; border-radius:12px; color:#fff; }
+    button { background:#00ffcc; color:#000; padding:12px; border:none; border-radius:12px; font-weight:800; width:100%; margin-top:15px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Profile ({{ user.profile.name }})</h2>
-    <form method="post">
-      <input name="name" placeholder="Full name" value="{{ user.profile.name }}">
-      <input name="age" placeholder="Age" value="{{ user.profile.age }}">
-      <input name="position" placeholder="Position" value="{{ user.profile.position }}">
-      <button type="submit">Save Profile</button>
-    </form>
-    <a href="/health">Enter Weekly Health</a> | <a href="/dashboard">Dashboard</a> | <a href="/logout">Logout</a>
+  <div class="card-3d">
+    <canvas id="cardCanvas"></canvas>
+    <div class="info">
+      <h2>{{ user.profile.name }}</h2>
+      <form method="post">
+        <input name="name" value="{{ user.profile.name }}">
+        <input name="age" value="{{ user.profile.age }}">
+        <input name="position" value="{{ user.profile.position }}">
+        <button>UPDATE CARD</button>
+      </form>
+      <div style="margin-top:15px; text-align:center;">
+        <a href="/dashboard" style="color:#00ffcc; margin:0 10px;">Hologram</a> |
+        <a href="/logout" style="color:#ff00aa;">Exit</a>
+      </div>
+    </div>
   </div>
+
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 420/600, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cardCanvas'), alpha: true });
+    renderer.setSize(420, 600);
+
+    const geometry = new THREE.BoxGeometry(3, 4, 0.2);
+    const texture = new THREE.TextureLoader().load('https://i.imgur.com/football-player-silhouette.png');
+    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    const card = new THREE.Mesh(geometry, material);
+    scene.add(card);
+
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      card.rotation.y += 0.005;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 </body>
 </html>
