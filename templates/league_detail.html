@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ league.name }} | NEXUS ATHLETE{% endblock %}
+
+{% block head %}
+<style>
+  table.league-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+  table.league-table th, table.league-table td { padding:9px 8px; text-align:center; border-bottom:1px solid var(--border); }
+  table.league-table th { color:var(--text-muted); font-size:0.78rem; text-transform:uppercase; }
+  table.league-table td:nth-child(2) { text-align:left; display:flex; align-items:center; gap:8px; }
+  table.league-table img.crest { width:20px; height:20px; object-fit:contain; }
+
+  .fixture-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+  .fixture-row:last-child { border-bottom:none; }
+  .fixture-teams { display:flex; align-items:center; gap:10px; font-weight:600; }
+  .fixture-teams img { width:22px; height:22px; object-fit:contain; }
+  .fixture-meta { color:var(--text-muted); font-size:0.82rem; }
+  .fixture-score { font-weight:800; }
+
+  table.league-table tbody tr, .fixture-row {
+    opacity:0; animation: rowIn 0.4s ease forwards;
+  }
+  @keyframes rowIn { from { opacity:0; transform: translateX(-8px); } to { opacity:1; transform: translateX(0); } }
+  table.league-table tbody tr:nth-child(-n+3) td:first-child { color:var(--accent); font-weight:800; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/leagues" class="muted" style="text-decoration:none; font-size:0.9rem;">&larr; All leagues</a>
+<h1 class="page-title" style="margin-top:8px;">{{ league.name }}</h1>
+<p class="page-subtitle">{{ league.country }}</p>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="table">Table</button>
+  <button class="tab-btn" data-tab="fixtures">Fixtures</button>
+  <button class="tab-btn" data-tab="results">Results</button>
+</div>
+
+<div class="card tab-panel active" id="tab-table">
+  {% if table %}
+  <table class="league-table">
+    <thead>
+      <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
+    </thead>
+    <tbody>
+      {% for row in table %}
+      <tr style="animation-delay: {{ (loop.index0 * 0.03) | round(2) }}s;">
+        <td>{{ row.intRank }}</td>
+        <td>{% if row.strBadge %}<img class="crest" src="{{ row.strBadge }}" alt="">{% endif %} {{ row.strTeam }}</td>
+        <td>{{ row.intPlayed }}</td>
+        <td>{{ row.intWin }}</td>
+        <td>{{ row.intDraw }}</td>
+        <td>{{ row.intLoss }}</td>
+        <td>{{ row.intGoalDifference }}</td>
+        <td><strong>{{ row.intPoints }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><p>Standings unavailable right now.</p></div>
+  {% endif %}
+</div>
+
+<div class="card tab-panel" id="tab-fixtures">
+  {% if fixtures %}
+  {% for event in fixtures %}
+  <div class="fixture-row" style="animation-delay: {{ (loop.index0 * 0.05) | round(2) }}s;">
+    <div class="fixture-teams">
+      {% if event.strHomeTeamBadge %}<img src="{{ event.strHomeTeamBadge }}" alt="">{% endif %}
+      {{ event.strHomeTeam }} vs {{ event.strAwayTeam }}
+      {% if event.strAwayTeamBadge %}<img src="{{ event.strAwayTeamBadge }}" alt="">{% endif %}
+    </div>
+    <div class="fixture-meta">{{ event.dateEvent }} &bull; {{ event.strTime }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty-state"><p>No upcoming fixtures found.</p></div>
+  {% endif %}
+</div>
+
+<div class="card tab-panel" id="tab-results">
+  {% if results %}
+  {% for event in results %}
+  <div class="fixture-row" style="animation-delay: {{ (loop.index0 * 0.05) | round(2) }}s;">
+    <div class="fixture-teams">
+      {% if event.strHomeTeamBadge %}<img src="{{ event.strHomeTeamBadge }}" alt="">{% endif %}
+      {{ event.strHomeTeam }}
+      <span class="fixture-score">{{ event.intHomeScore }} - {{ event.intAwayScore }}</span>
+      {{ event.strAwayTeam }}
+      {% if event.strAwayTeamBadge %}<img src="{{ event.strAwayTeamBadge }}" alt="">{% endif %}
+    </div>
+    <div class="fixture-meta">{{ event.dateEvent }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty-state"><p>No recent results found.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    });
+  });
+</script>
+{% endblock %}

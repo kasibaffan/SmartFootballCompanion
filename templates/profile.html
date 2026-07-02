@@ -1,56 +1,62 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>PLAYER CARD | NEXUS</title>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <style>
-    body { margin:0; background:#050814; color:#e0f7fa; font-family:'Exo 2'; display:flex; justify-content:center; align-items:center; height:100vh; }
-    .card-3d { width:420px; height:600px; position:relative; perspective:1000px; }
-    #cardCanvas { width:100%; height:100%; }
-    .info { position:absolute; bottom:20px; left:20px; right:20px; background:rgba(0,0,0,0.7); padding:20px; border-radius:20px; backdrop-filter:blur(10px); border:1px solid #00ffcc33; }
-    .info h2 { color:#00ffcc; font-family:Orbitron; margin-bottom:10px; }
-    input { width:100%; padding:12px; margin:8px 0; background:#112; border:1px solid #00ffcc33; border-radius:12px; color:#fff; }
-    button { background:#00ffcc; color:#000; padding:12px; border:none; border-radius:12px; font-weight:800; width:100%; margin-top:15px; }
-  </style>
-</head>
-<body>
-  <div class="card-3d">
-    <canvas id="cardCanvas"></canvas>
-    <div class="info">
-      <h2>{{ user.profile.name }}</h2>
-      <form method="post">
-        <input name="name" value="{{ user.profile.name }}">
-        <input name="age" value="{{ user.profile.age }}">
-        <input name="position" value="{{ user.profile.position }}">
-        <button>UPDATE CARD</button>
-      </form>
-      <div style="margin-top:15px; text-align:center;">
-        <a href="/dashboard" style="color:#00ffcc; margin:0 10px;">Hologram</a> |
-        <a href="/logout" style="color:#ff00aa;">Exit</a>
-      </div>
+{% extends "base.html" %}
+{% block title %}My Card | NEXUS ATHLETE{% endblock %}
+
+{% block head %}
+<style>
+  #player-card { transition: transform 0.15s ease-out; transform-style: preserve-3d; }
+  #player-card img { transition: transform 0.15s ease-out; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Player Card</h1>
+<p class="page-subtitle">This is how your profile shows up across NEXUS ATHLETE.</p>
+
+<div class="grid grid-2">
+  <div class="card" id="player-card" style="text-align:center;">
+    <img src="https://api.dicebear.com/9.x/adventurer/svg?seed={{ current_user.username }}" alt=""
+         style="width:120px; height:120px; border-radius:50%; background:var(--bg); margin-bottom:14px;">
+    <h2 style="margin:0 0 4px;">{{ user.profile.name or "Unnamed Player" }}</h2>
+    <p class="muted" style="margin:0 0 14px;">{{ user.profile.position or "Position not set" }} &bull; Level {{ user_level }} &bull; {{ user_xp }} XP</p>
+    <div class="grid grid-4">
+      <div class="stat-tile"><div class="stat-value">{{ user.profile.age or "-" }}</div><div class="stat-label">Age</div></div>
+      <div class="stat-tile"><div class="stat-value">{{ user_level }}</div><div class="stat-label">Level</div></div>
     </div>
   </div>
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 420/600, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cardCanvas'), alpha: true });
-    renderer.setSize(420, 600);
+  <div class="card">
+    <h3 class="card-title">Edit Card</h3>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">{% for m in messages %}<p style="margin:0;">{{ m }}</p>{% endfor %}</div>
+      {% endif %}
+    {% endwith %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="name">Name</label><input id="name" name="name" value="{{ user.profile.name or '' }}"></div>
+      <div class="field"><label for="age">Age</label><input id="age" name="age" type="number" value="{{ user.profile.age or '' }}"></div>
+      <div class="field"><label for="position">Position</label><input id="position" name="position" value="{{ user.profile.position or '' }}"></div>
+      <button class="btn btn-block" type="submit">Update Card</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
 
-    const geometry = new THREE.BoxGeometry(3, 4, 0.2);
-    const texture = new THREE.TextureLoader().load('https://i.imgur.com/football-player-silhouette.png');
-    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-    const card = new THREE.Mesh(geometry, material);
-    scene.add(card);
-
-    camera.position.z = 5;
-
-    function animate() {
-      requestAnimationFrame(animate);
-      card.rotation.y += 0.005;
-      renderer.render(scene, camera);
-    }
-    animate();
-  </script>
-</body>
-</html>
+{% block scripts %}
+<script>
+  // Subtle tilt-toward-cursor effect on the player card - a small "senior
+  // frontend" touch rather than a static flat card.
+  const playerCard = document.getElementById('player-card');
+  if (playerCard) {
+    playerCard.addEventListener('mousemove', (e) => {
+      const rect = playerCard.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      playerCard.style.transform = `perspective(600px) rotateY(${px * 6}deg) rotateX(${-py * 6}deg)`;
+    });
+    playerCard.addEventListener('mouseleave', () => {
+      playerCard.style.transform = 'perspective(600px) rotateY(0) rotateX(0)';
+    });
+  }
+</script>
+{% endblock %}

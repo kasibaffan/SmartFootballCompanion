@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Leagues | NEXUS ATHLETE{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Leagues</h1>
+<p class="page-subtitle">Tables, fixtures, and results for major leagues. (A curated set, not every league worldwide.)</p>
+
+<div class="grid grid-2">
+  {% for league in leagues %}
+  <a class="card" href="/leagues/{{ league.id }}" style="text-decoration:none; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="font-weight:700;">{{ league.name }}</div>
+      <div class="muted" style="font-size:0.88rem;">{{ league.country }}</div>
+    </div>
+    <span class="muted">&rarr;</span>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

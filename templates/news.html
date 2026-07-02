@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}News | NEXUS ATHLETE{% endblock %}
+
+{% block head %}
+<style>
+  .news-list { display:flex; flex-direction:column; gap:14px; }
+  .news-card { display:flex; gap:16px; align-items:flex-start; }
+  .news-card img { width:96px; height:72px; object-fit:cover; border-radius:8px; flex-shrink:0; background:var(--bg); }
+  .news-card h3 { margin:0 0 6px; font-size:1rem; }
+  .news-card h3 a { text-decoration:none; }
+  .news-card h3 a:hover { color:var(--accent); }
+  .news-card p { margin:0 0 6px; color:var(--text-muted); font-size:0.9rem; }
+  .news-card .pub-date { font-size:0.78rem; color:var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Football News</h1>
+<p class="page-subtitle">Daily headlines and transfer news, straight from BBC Sport.</p>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="headlines">Headlines</button>
+  <button class="tab-btn" data-tab="transfers">Transfers</button>
+</div>
+
+<div class="tab-panel active" id="tab-headlines">
+  {% if headlines %}
+  <div class="news-list">
+    {% for item in headlines %}
+    <div class="card news-card">
+      {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="">{% endif %}
+      <div>
+        <h3><a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.title }}</a></h3>
+        <p>{{ item.description }}</p>
+        <div class="pub-date">{{ item.pub_date }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card empty-state"><p>No headlines available right now.</p></div>
+  {% endif %}
+</div>
+
+<div class="tab-panel" id="tab-transfers">
+  {% if transfers %}
+  <div class="news-list">
+    {% for item in transfers %}
+    <div class="card news-card">
+      {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="">{% endif %}
+      <div>
+        <h3><a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.title }}</a></h3>
+        <p>{{ item.description }}</p>
+        <div class="pub-date">{{ item.pub_date }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card empty-state"><p>No transfer news available right now &mdash; check back during deadline day.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    });
+  });
+</script>
+{% endblock %}

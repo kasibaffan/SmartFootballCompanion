@@ -1,142 +1,171 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NEXUS ATHLETE™</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@300;600;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
-  <style>
-    :root {
-      --bg: #050814;
-      --primary: #00ffcc;
-      --secondary: #0072ff;
-      --accent: #ff00aa;
-      --text: #e0f7fa;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Exo 2', sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      position: relative;
-    }
-    .matrix-bg {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(to bottom, #000 0%, #001a1a 100%);
-      overflow: hidden;
-    }
-    .matrix-rain {
-      position: absolute;
-      width: 100%; height: 100%;
-      pointer-events: none;
-    }
-    .drop {
-      position: absolute;
-      color: var(--primary);
-      font-family: 'Courier New';
-      font-size: 14px;
-      opacity: 0;
-      animation: fall linear infinite;
-    }
-    @keyframes fall {
-      to { transform: translateY(100vh); opacity: 0; }
-    }
-    .hero {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    .logo-3d {
-      width: 200px; height: 200px;
-      background: url('https://i.imgur.com/5z5z5z5.png') center/contain no-repeat;
-      filter: drop-shadow(0 0 40px var(--primary));
-      animation: float 6s infinite ease-in-out;
-    }
-    h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 5rem;
-      font-weight: 900;
-      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 60px rgba(0,255,204,0.8);
-      letter-spacing: 8px;
-      margin: 20px 0;
-    }
-    .tagline {
-      font-size: 1.5rem;
-      color: #88f7d8;
-      margin: 20px 0 50px;
-      letter-spacing: 3px;
-      opacity: 0;
-    }
-    .cta {
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      padding: 18px 50px;
-      border: none;
-      border-radius: 50px;
-      color: #000;
-      font-weight: 800;
-      font-size: 1.3rem;
-      cursor: pointer;
-      box-shadow: 0 0 60px rgba(0,255,204,0.7);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.5s;
-    }
-    .cta:hover {
-      transform: scale(1.1) translateY(-10px);
-      box-shadow: 0 0 100px rgba(0,255,204,1);
-    }
-    .cta::before {
-      content: ''; position: absolute; top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: scan 2s infinite;
-    }
-    @keyframes scan { to { left: 100%; } }
-    @keyframes float { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(5deg); } }
-  </style>
-</head>
-<body>
-  <div class="matrix-bg">
-    <div class="matrix-rain" id="rain"></div>
+{% extends "base.html" %}
+{% block title %}NEXUS ATHLETE{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<style>
+  .hero-wrap {
+    min-height: calc(100vh - 60px); display:flex; align-items:center; justify-content:center;
+    padding: 40px 20px; gap:60px; flex-wrap:wrap;
+  }
+  .hero-copy { max-width:520px; }
+  .hero-copy h1 { font-size:2.6rem; font-weight:800; margin:0 0 14px; line-height:1.15; letter-spacing:-0.02em; }
+
+  .dribble-stage { width:360px; height:300px; flex-shrink:0; }
+  .dribble-stage canvas { width:100%; height:100%; display:block; }
+
+  @media (max-width: 720px) {
+    .hero-wrap { flex-direction: column-reverse; text-align:center; }
+    .hero-copy { text-align:center; }
+  }
+</style>
+{% endblock %}
+
+{% block full_content %}
+<div class="hero-wrap">
+  <div class="hero-copy">
+    <div class="badge badge-live" style="background:rgba(0,179,104,0.1); color:var(--accent); margin-bottom:18px;">FOOTBALL COMPANION</div>
+    <h1>Train smarter. Track everything. Never miss a match.</h1>
+    <p class="muted" style="font-size:1.05rem; margin-bottom:32px;">AI-driven performance insights, a live match tracker, real league tables, football news, and training drills &mdash; all in one place.</p>
+    <a class="btn" style="padding:14px 32px; font-size:1rem;" href="/login">Get Started</a>
   </div>
 
-  <div class="hero">
-    <div class="logo-3d"></div>
-    <h1>NEXUS ATHLETE</h1>
-    <p class="tagline">AI COACH • 3D PERFORMANCE • ECO WARRIOR</p>
-    <button class="cta" onclick="location.href='/login'">ENTER THE MATRIX</button>
+  <div class="dribble-stage" aria-hidden="true">
+    <canvas id="hero-canvas"></canvas>
   </div>
+</div>
+{% endblock %}
 
-  <script>
-    // Matrix Rain
-    const rain = document.getElementById('rain');
-    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-    setInterval(() => {
-      const drop = document.createElement('div');
-      drop.className = 'drop';
-      drop.textContent = chars[Math.floor(Math.random() * chars.length)];
-      drop.style.left = Math.random() * 100 + 'vw';
-      drop.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      drop.style.opacity = Math.random();
-      rain.appendChild(drop);
-      setTimeout(() => drop.remove(), 5000);
-    }, 50);
+{% block scripts %}
+<script>
+(function () {
+  const stage = document.querySelector('.dribble-stage');
+  const canvas = document.getElementById('hero-canvas');
+  if (!stage || !canvas || !window.THREE) return;
 
-    // GSAP Animations
-    gsap.from("h1", { y: 100, opacity: 0, duration: 1.5, delay: 0.5 });
-    gsap.to(".tagline", { opacity: 1, y: 0, duration: 1, delay: 1 });
-  </script>
-</body>
-</html>
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, stage.clientWidth / stage.clientHeight, 0.1, 100);
+  camera.position.set(0.6, 2.6, 7.5);
+  camera.lookAt(0, 1.5, 0);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+  sun.position.set(4, 8, 5);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  scene.add(sun);
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.16 }));
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // --- Player rig: a minimal, faceless mannequin (matches the app's flat-color look, just in 3D) ---
+  const navy = 0x12141c;
+  const bodyMat = new THREE.MeshStandardMaterial({ color: navy, roughness: 0.65 });
+
+  const player = new THREE.Group();
+  scene.add(player);
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 16), bodyMat);
+  head.position.y = 2.42;
+  head.castShadow = true;
+  player.add(head);
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 1.0, 14), bodyMat);
+  torso.position.y = 1.6;
+  torso.castShadow = true;
+  player.add(torso);
+
+  function limb(radiusTop, radiusBottom, length, pivotY, pivotX) {
+    const geometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 10);
+    geometry.translate(0, -length / 2, 0);
+    const mesh = new THREE.Mesh(geometry, bodyMat);
+    mesh.castShadow = true;
+    const pivot = new THREE.Group();
+    pivot.position.set(pivotX, pivotY, 0);
+    pivot.add(mesh);
+    player.add(pivot);
+    return pivot;
+  }
+
+  const legFront = limb(0.13, 0.1, 1.15, 1.08, 0.14);
+  const legBack = limb(0.13, 0.1, 1.15, 1.08, -0.14);
+  const armFront = limb(0.09, 0.07, 0.82, 2.02, 0.34);
+  const armBack = limb(0.09, 0.07, 0.82, 2.02, -0.34);
+
+  // --- Ball: procedurally textured so it reads as a football, not a plain sphere ---
+  function buildBallTexture() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#f4f5f7';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    function pentagon(cx, cy, r, rot) {
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = rot + (i / 5) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = '#12141c';
+      ctx.fill();
+    }
+
+    const spots = [
+      [80, 60, 28, 0.2], [230, 40, 26, 1.1], [400, 70, 27, 2.0],
+      [60, 190, 26, 0.6], [220, 210, 28, 1.6], [400, 190, 26, 2.6],
+      [150, 128, 30, 0.9], [340, 128, 30, 2.3],
+    ];
+    spots.forEach(([x, y, r, rot]) => pentagon(x, y, r, rot));
+    return new THREE.CanvasTexture(c);
+  }
+
+  const ball = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 24, 20),
+    new THREE.MeshStandardMaterial({ map: buildBallTexture(), roughness: 0.55 })
+  );
+  ball.castShadow = true;
+  scene.add(ball);
+
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.045;
+
+    player.position.y = Math.abs(Math.sin(t * 2)) * 0.06;
+    legFront.rotation.x = Math.sin(t * 2) * 0.5;
+    legBack.rotation.x = -Math.sin(t * 2) * 0.5;
+    armFront.rotation.x = -Math.sin(t * 2) * 0.35;
+    armBack.rotation.x = Math.sin(t * 2) * 0.35;
+
+    const ballX = 0.55 + Math.sin(t * 2) * 0.35;
+    const bounce = Math.abs(Math.sin(t * 2 + 0.6));
+    ball.position.set(ballX, 0.3 + bounce * 0.35, 0.15);
+    ball.scale.set(1, 1 - bounce * 0.12 + 0.12, 1);
+    ball.rotation.z -= 0.05;
+
+    camera.position.x = 0.6 + Math.sin(t * 0.25) * 0.4;
+    camera.lookAt(0.3, 1.4, 0);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+{% endblock %}

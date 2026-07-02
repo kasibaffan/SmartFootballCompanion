@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}NEXUS ATHLETE{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="navbar">
+    <a class="logo" href="{{ '/dashboard' if current_user.is_authenticated else '/' }}"><span class="dot"></span> NEXUS ATHLETE</a>
+
+    {% if current_user.is_authenticated %}
+    <div class="nav-tabs">
+      <a href="/dashboard" class="{{ 'active' if request.path == '/dashboard' }}">Dashboard</a>
+      <a href="/live" class="{{ 'active' if request.path.startswith('/live') }}">Live</a>
+      <a href="/leagues" class="{{ 'active' if request.path.startswith('/leagues') }}">Leagues</a>
+      <a href="/news" class="{{ 'active' if request.path == '/news' }}">News</a>
+      <a href="/drills" class="{{ 'active' if request.path == '/drills' }}">Drills</a>
+    </div>
+    <div class="nav-right">
+      <div class="avatar-menu" id="avatar-menu">
+        <button class="avatar-trigger" id="avatar-trigger" type="button" aria-label="Account menu">
+          <img src="https://api.dicebear.com/9.x/adventurer/svg?seed={{ current_user.username }}" alt="">
+        </button>
+        <div class="avatar-dropdown" id="avatar-dropdown">
+          <a href="/profile">My Card</a>
+          <a href="/health">Log Stats</a>
+          <a href="/logout">Logout</a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="nav-auth-links">
+      <a href="/login">Login</a>
+      <a href="/register" class="primary">Register</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% block full_content %}
+  <div class="page{% block page_narrow_class %}{% endblock %}">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">{% for m in messages %}<p style="margin:0;">{{ m }}</p>{% endfor %}</div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+  {% endblock %}
+
+  <script>
+    const avatarTrigger = document.getElementById('avatar-trigger');
+    const avatarDropdown = document.getElementById('avatar-dropdown');
+    if (avatarTrigger) {
+      avatarTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        avatarDropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', () => avatarDropdown.classList.remove('open'));
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Live Match | NEXUS ATHLETE{% endblock %}
+
+{% block head %}
+<style>
+  .clock { font-size: 3rem; font-weight: 800; letter-spacing: 1px; }
+  .event-buttons { display:flex; gap:10px; flex-wrap:wrap; margin: 20px 0; }
+  .timeline { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; margin-top:10px; }
+  .timeline-item {
+    display:flex; gap:12px; align-items:center; padding:10px 14px; border-radius:9px;
+    background: var(--bg); animation: slideIn 0.35s ease both;
+  }
+  @keyframes slideIn { from { opacity:0; transform: translateX(-10px); } to { opacity:1; transform: translateX(0); } }
+  .timeline-item .minute { font-weight:800; color: var(--text-muted); min-width:38px; }
+  .timeline-item.goal .minute { color: var(--accent); }
+  .timeline-item.card .minute { color: var(--warning); }
+
+  .clock.celebrate { animation: goalPulse 0.6s ease; }
+  @keyframes goalPulse {
+    0% { transform: scale(1); color: var(--text); }
+    30% { transform: scale(1.15); color: var(--accent); }
+    100% { transform: scale(1); color: var(--text); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Live Match</h1>
+<p class="page-subtitle">Track goals, cards, and subs as they happen.</p>
+
+{% if not match %}
+<div class="card page-narrow" style="margin:0 auto; text-align:center;">
+  <form method="POST" id="start-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field" style="text-align:left;">
+      <label for="opponent">Opponent (optional)</label>
+      <input id="opponent" type="text" name="opponent" placeholder="e.g. Rivertown FC">
+    </div>
+    <button class="btn btn-block" type="submit">Kick Off</button>
+  </form>
+</div>
+{% else %}
+<div class="card">
+  <div class="badge badge-live" style="margin-bottom:12px;"><span class="dot"></span> LIVE</div>
+  <p class="muted" style="margin:0 0 6px;">vs {{ match.opponent or "Unknown Opponent" }}</p>
+  <div class="clock" id="clock">00:00</div>
+
+  <div class="event-buttons">
+    <button class="btn btn-secondary" data-event="goal">Goal</button>
+    <button class="btn btn-secondary" data-event="card">Card</button>
+    <button class="btn btn-secondary" data-event="sub">Sub</button>
+    <button class="btn btn-secondary" data-event="note">Note</button>
+    <button class="btn btn-danger" id="end-match">End Match</button>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if match %}
+<script>
+  const csrfToken = {{ csrf_token() | tojson }};
+  const startedAt = new Date({{ (match.started_at.isoformat() + "Z") | tojson }}).getTime();
+  const EVENT_LABELS = { goal: "GOAL", card: "CARD", sub: "SUB", note: "NOTE" };
+
+  function tickClock() {
+    const elapsedSec = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    const mins = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
+    const secs = String(elapsedSec % 60).padStart(2, "0");
+    document.getElementById("clock").textContent = `${mins}:${secs}`;
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
+  function renderTimeline(events) {
+    const timeline = document.getElementById("timeline");
+    timeline.innerHTML = "";
+    events.slice().reverse().forEach(ev => {
+      const div = document.createElement("div");
+      div.className = `timeline-item ${ev.type}`;
+      div.innerHTML = `<div class="minute">${ev.minute}'</div><div>${EVENT_LABELS[ev.type] || ev.type.toUpperCase()}${ev.note ? " - " + ev.note : ""}</div>`;
+      timeline.appendChild(div);
+    });
+  }
+
+  async function refreshEvents() {
+    const resp = await fetch("/live/events");
+    const data = await resp.json();
+    if (!data.active) {
+      window.location.reload();
+      return;
+    }
+    renderTimeline(data.events);
+  }
+
+  document.querySelectorAll(".event-buttons button[data-event]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const body = new URLSearchParams({ event_type: btn.dataset.event });
+      await fetch("/live/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrfToken },
+        body,
+      });
+      if (btn.dataset.event === "goal") {
+        const clock = document.getElementById("clock");
+        clock.classList.remove("celebrate");
+        void clock.offsetWidth; // restart the animation even on back-to-back goals
+        clock.classList.add("celebrate");
+      }
+      refreshEvents();
+    });
+  });
+
+  document.getElementById("end-match").addEventListener("click", async () => {
+    await fetch("/live/end", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrfToken },
+      body: new URLSearchParams(),
+    });
+    window.location.reload();
+  });
+
+  refreshEvents();
+  setInterval(refreshEvents, 5000);
+</script>
+{% endif %}
+{% endblock %}

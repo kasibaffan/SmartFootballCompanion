@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | NEXUS ATHLETE{% endblock %}
+
+{% block content %}
+<div class="page-narrow" style="text-align:center; padding-top:80px;">
+  <div class="card">
+    <h1 class="page-title" style="margin-bottom:10px;">{{ title }}</h1>
+    <p class="muted" style="margin-bottom:20px;">{{ message }}</p>
+    <a class="btn" href="javascript:history.back()">Go Back</a>
+  </div>
+</div>
+{% endblock %}

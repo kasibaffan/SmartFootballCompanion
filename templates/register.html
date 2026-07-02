@@ -1,115 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Register | SmartFootballCompanion</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    .register-box {
-      background: rgba(0, 255, 204, 0.05);
-      border-radius: 15px;
-      box-shadow: 0 0 25px #00ffcc55;
-      width: 400px;
-      margin: 100px auto;
-      padding: 35px;
-      text-align: center;
-      animation: fadeInDown 1.2s ease-out;
-      position: relative;
-      overflow: hidden;
-    }
+{% extends "base.html" %}
+{% block title %}Register | NEXUS ATHLETE{% endblock %}
 
-    .glow-circle {
-      position: absolute;
-      width: 450px;
-      height: 450px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #0072ff33, transparent);
-      bottom: -130px;
-      right: -100px;
-      filter: blur(25px);
-      animation: rotateGlow 6s infinite linear;
-    }
-
-    @keyframes fadeInDown {
-      from { transform: translateY(-40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    @keyframes rotateGlow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .register-box h2 {
-      background: linear-gradient(90deg, #00ffcc, #0072ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-size: 2em;
-      margin-bottom: 25px;
-      text-shadow: 0 0 15px #00ffcc66;
-    }
-
-    .input-field {
-      width: 80%;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.7);
-      border: none;
-      color: #00ffcc;
-      font-size: 1em;
-      transition: all 0.3s;
-    }
-
-    .input-field:focus {
-      box-shadow: 0 0 15px #00ffff;
-      transform: scale(1.03);
-    }
-
-    .btn {
-      background: linear-gradient(90deg, #00ffcc, #0072ff);
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: 0.3s ease;
-    }
-
-    .btn:hover {
-      background: linear-gradient(90deg, #00ffaa, #00ffff);
-      transform: scale(1.08);
-      box-shadow: 0 0 20px #00ffff88;
-    }
-
-    .link {
-      margin-top: 15px;
-      display: block;
-      color: #00ffcc;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .link:hover {
-      color: #fff;
-      text-shadow: 0 0 10px #00ffff;
-    }
-  </style>
-</head>
-<body>
-  <div class="register-box">
-    <div class="glow-circle"></div>
-    <h2>Create Player Account 🏃‍♂️</h2>
-    <form method="POST">
-      <input class="input-field" type="text" name="username" placeholder="Enter Username" required><br>
-      <input class="input-field" type="password" name="password" placeholder="Enter Password" required><br>
-      <button class="btn" type="submit">Create Account</button>
+{% block content %}
+<div class="page-narrow">
+  <div class="card" style="text-align:center;">
+    <h2 style="margin:0 0 20px;">Create Your Account</h2>
+    <form method="POST" style="text-align:left;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required>
+      </div>
+      <button class="btn btn-block" type="submit">Create Account</button>
     </form>
-    <a href="/login" class="link">Already have an account? Login</a>
+    <p class="muted" style="margin-top:18px; font-size:0.9rem;">
+      Already have an account? <a href="/login" style="color:var(--accent); font-weight:600;">Login</a>
+    </p>
   </div>
-
-  <footer>© 2025 SmartFootballCompanion | Join the Team 🌟</footer>
-</body>
-</html>
+</div>
+{% endblock %}
